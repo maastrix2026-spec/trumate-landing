@@ -107,8 +107,7 @@ export default function ContactPage() {
                                 <div>
                                     <h3 className="text-sm font-serif font-semibold text-stone-900 mb-1">Email Us</h3>
                                     <p className="text-xs text-stone-600 leading-relaxed break-all">
-                                        support@trumate.com<br />
-                                        bulk@trumate.com
+                                        trumate.enterprises@gmail.com<br />
                                     </p>
                                 </div>
                             </div>

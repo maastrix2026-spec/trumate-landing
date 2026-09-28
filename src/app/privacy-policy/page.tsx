@@ -180,7 +180,7 @@ export default function PrivacyPolicyPage() {
             </p>
             <div className="mt-4 p-4 rounded-xl bg-stone-50 border border-stone-200 text-xs font-medium text-stone-700 flex items-center gap-3">
               <Mail className="size-5 text-[#1C3516]" />
-              <span>Email: privacy@trumate.com | Support Desk: support@trumate.com</span>
+              <span>Email: trumate.enterprises@gmail.com</span>
             </div>
           </section>
 

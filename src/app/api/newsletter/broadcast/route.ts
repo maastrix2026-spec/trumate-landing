@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     // Send email using BCC to keep recipient emails private, or loop through them
     // Using BCC for a single dispatch is efficient for small-to-medium lists:
     const info = await transporter.sendMail({
-      from: process.env.SMTP_FROM || `"Trumate" <support@trumate.com>`,
+      from: process.env.SMTP_FROM || `"Trumate" Support Team`,
       bcc: emails, // Keeps subscribers' email addresses hidden from one another
       subject: subject,
       text: message, // Plain text fallback

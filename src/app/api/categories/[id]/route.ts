@@ -7,6 +7,22 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
+export async function GET (req: Request, {params}: RouteParams){
+   try {
+    await connectDB();
+    const { id } = await params;
+    const category = await Category.findById(id);
+
+    if (!category) {
+      return NextResponse.json({ success: false, error: "Category not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, data: category }, { status: 200 });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+  }
+}
+
 // PUT: Update category
 export async function PUT(req: Request, { params }: RouteParams) {
   try {

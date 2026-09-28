@@ -188,11 +188,11 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone className="size-4 text-[#1C3516] shrink-0" />
-                <span>+91 (000) 000-0000</span>
+                <span>+91 9437058654</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Mail className="size-4 text-[#1C3516] shrink-0" />
-                <span>support@trumate.com</span>
+                <span>trumate.enterprises@gmail.com</span>
               </li>
             </ul>
           </div>
