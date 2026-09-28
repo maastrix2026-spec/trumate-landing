@@ -184,7 +184,7 @@ export default function Footer() {
             <ul className="space-y-2.5 sm:space-y-3 text-xs sm:text-sm text-stone-600">
               <li className="flex items-start gap-2.5">
                 <MapPin className="size-4 text-[#1C3516] shrink-0 mt-0.5" />
-                <span>India</span>
+                <span>Bhubaneswar, India</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone className="size-4 text-[#1C3516] shrink-0" />

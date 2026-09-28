@@ -77,7 +77,7 @@ export default function ContactPage() {
                                 <div>
                                     <h3 className="text-sm font-serif font-semibold text-stone-900 mb-1">Our Location</h3>
                                     <p className="text-xs text-stone-600 leading-relaxed">
-                                        Trumate Headquarters<br />
+                                        Trumate Headquarters, Bhubaneswar<br />
                                         India
                                     </p>
                                 </div>
@@ -92,7 +92,7 @@ export default function ContactPage() {
                                 <div>
                                     <h3 className="text-sm font-serif font-semibold text-stone-900 mb-1">Phone Support</h3>
                                     <p className="text-xs text-stone-600 leading-relaxed">
-                                        +91 (000) 000-0000<br />
+                                        +91 9437058654<br />
                                         Mon - Sat (9:00 AM - 6:00 PM)
                                     </p>
                                 </div>
