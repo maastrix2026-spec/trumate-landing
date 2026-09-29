@@ -3,7 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "About Us | Sustainable Tableware & Spices Supplier in Bhubaneswar",
+  title: "About Us | Sustainable Tableware & eco friendly products Supplier in Bhubaneswar",
   description: "Learn about Trumate's mission to bring 100% biodegradable tableware and pure kitchen spices to homes, restaurants, and businesses across Bhubaneswar, Odisha.",
   alternates: {
     canonical: "/about",

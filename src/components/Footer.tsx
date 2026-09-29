@@ -72,7 +72,7 @@ export default function Footer() {
               />
             </Link>
             <p className="text-xs sm:text-sm text-stone-600 max-w-sm leading-relaxed mb-6 font-sans">
-              Bringing quality to every kitchen with authentic pure spices and sustainable, 100% biodegradable food-service packaging for a greener tomorrow.
+              Bringing quality to every kitchen with sustainable, 100% biodegradable food-service packaging for a greener tomorrow.
             </p>
             
             {/* Newsletter Mini Form */}
@@ -126,7 +126,7 @@ export default function Footer() {
             <ul className="space-y-2.5 sm:space-y-3 text-xs sm:text-sm">
               <li>
                 <Link href="/products" className="text-stone-600 hover:text-[#1C3516] transition-colors">
-                  Pure Spices & Masalas
+                  Eco friendly products
                 </Link>
               </li>
               <li>

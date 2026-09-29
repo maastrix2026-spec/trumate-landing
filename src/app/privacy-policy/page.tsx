@@ -77,7 +77,7 @@ export default function PrivacyPolicyPage() {
               Primary Purposes of Data Processing
             </h2>
             <p className="text-xs md:text-sm text-stone-600 leading-relaxed">
-              The information we gather is processed exclusively to fulfill commercial obligations. This includes handling wholesale volume quotes, preparing custom invoices, tracking product deliveries, maintaining account security, providing customer support, and refining our product line catalogs (biodegradables and spices).
+              The information we gather is processed exclusively to fulfill commercial obligations. This includes handling wholesale volume quotes, preparing custom invoices, tracking product deliveries, maintaining account security, providing customer support, and refining our product line catalogs (biodegradables products).
             </p>
           </section>
 

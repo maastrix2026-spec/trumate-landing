@@ -61,7 +61,7 @@ export default function ContactPage() {
                         We&apos;d love to hear from you.
                     </h1>
                     <p className="text-sm md:text-base text-stone-600 leading-relaxed font-sans px-2 sm:px-0">
-                        Have questions about our biodegradable tableware or pure kitchen spices? Reach out to our team and we&apos;ll get back to you shortly.
+                        Have questions about our biodegradable products? Reach out to our team and we&apos;ll get back to you shortly.
                     </p>
                 </div>
 

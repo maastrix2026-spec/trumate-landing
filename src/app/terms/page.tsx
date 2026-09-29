@@ -27,7 +27,7 @@ export default function TermsAndConditionsPage() {
           <section className="space-y-3">
             <h2 className="text-xl sm:text-2xl font-serif text-[#1C3516]">1. Introduction</h2>
             <p className="text-sm sm:text-base leading-relaxed text-stone-600">
-              Welcome to Trumate. These Terms and Conditions govern your access to and use of our website, services, and the purchase of our pure kitchen spices and 100% biodegradable tableware. By accessing or using our platform, you agree to comply with and be bound by these terms.
+              Welcome to Trumate. These Terms and Conditions govern your access to and use of our website, services, and the purchase of our pure eco-friendly and 100% biodegradable tableware. By accessing or using our platform, you agree to comply with and be bound by these terms.
             </p>
           </section>
 
@@ -47,7 +47,7 @@ export default function TermsAndConditionsPage() {
           <section className="space-y-3">
             <h2 className="text-xl sm:text-2xl font-serif text-[#1C3516]">3. Products and Pricing</h2>
             <p className="text-sm sm:text-base leading-relaxed text-stone-600">
-              We strive to ensure that all details, descriptions, and prices of our spices and eco-friendly tableware appear accurately. However, errors may occur. We reserve the right to correct any errors, inaccuracies, or omissions and to change or update information at any time without prior notice.
+              We strive to ensure that all details, descriptions, and prices of our products appear accurately. However, errors may occur. We reserve the right to correct any errors, inaccuracies, or omissions and to change or update information at any time without prior notice.
             </p>
           </section>
 

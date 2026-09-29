@@ -296,7 +296,7 @@ export default function SubscribersPage() {
                                 <input
                                     type="text"
                                     required
-                                    placeholder="e.g. Exciting New Eco-Arrivals & Spices!"
+                                    placeholder="e.g. Exciting New Eco-Arrivals!"
                                     value={subject}
                                     onChange={(e) => setSubject(e.target.value)}
                                     className="w-full bg-stone-50 border border-stone-200 rounded-xl px-4 py-2.5 text-xs text-stone-800 outline-none focus:border-[#1C3516] focus:bg-white transition-all"

@@ -1,8 +1,31 @@
-import Link from "next/link";
+"use client";
 import { Download, Smartphone, ShieldCheck, Zap } from "lucide-react";
 import Image from "next/image";
+import { toast } from "sonner";
+
 
 export default function AppDownloadSection() {
+  const handleDownload = () => {
+    toast("Download Trumate App", {
+      description: "Get the Android APK to order eco-friendly tableware on the go.",
+      action: {
+        label: "Confirm Download",
+        onClick: () => {
+          // Path to your APK file (e.g., placed in the public folder like /downloads/trumate-app.apk)
+          const apkUrl = "/downloads/trumate-app.apk"; 
+          
+          const link = document.createElement("a");
+          link.href = apkUrl;
+          link.download = "trumate-app.apk";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+
+          toast.success("Download started successfully!");
+        },
+      },
+    });
+  };
   return (
     <section className="w-full bg-[#FAF9F5] py-12 sm:py-16 md:py-20 lg:py-24 px-4 sm:px-6 md:px-12 lg:px-20 border-t border-stone-200/60 overflow-hidden">
       <div className="mx-auto max-w-7xl">
@@ -27,18 +50,19 @@ export default function AppDownloadSection() {
               </h2>
 
               <p className="text-xs sm:text-sm md:text-base text-stone-700 max-w-xl mx-auto lg:mx-0 leading-relaxed font-sans mb-6 sm:mb-8">
-                Experience faster checkouts, exclusive app-only deals on sustainable tableware and pure spices, and real-time order tracking right from your pocket.
+                Experience faster checkouts, exclusive app-only deals on sustainable products, and real-time order tracking right from your pocket.
               </p>
 
               {/* Action Button */}
               <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4">
-                <Link
-                  href="/download/trumate-app.apk"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 rounded-xl bg-[#1C3516] px-6 sm:px-8 py-3.5 sm:py-4 text-sm font-medium text-amber-50 shadow-md transition-all hover:bg-[#274a20] hover:shadow-lg active:scale-95"
+                <button
+                  type="button"
+                  onClick={handleDownload}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 rounded-xl bg-[#1C3516] px-6 sm:px-8 py-3.5 sm:py-4 text-sm font-medium text-amber-50 shadow-md transition-all hover:bg-[#274a20] hover:shadow-lg active:scale-95 cursor-pointer"
                 >
                   <Download className="size-5 text-amber-200" />
                   Download App Now
-                </Link>
+                </button>
                 <span className="text-xs text-stone-500 font-medium">
                   Direct Download • Secure & Safe
                 </span>
@@ -66,7 +90,7 @@ export default function AppDownloadSection() {
 
                 {/* Phone Outer Shell */}
                 <div className="relative w-full aspect-[9/19] rounded-[38px] sm:rounded-[42px] bg-white border-[7px] sm:border-[8px] border-white shadow-2xl ring-1 ring-stone-900/10 flex flex-col overflow-hidden">
-                  
+
                   {/* Phone Speaker / Camera Notch Pill */}
                   <div className="absolute top-3 left-1/2 transform -translate-x-1/2 w-16 sm:w-20 h-3.5 sm:h-4 bg-stone-100 rounded-full z-20 flex items-center justify-center">
                     <div className="w-2.5 sm:w-3 h-2.5 sm:h-3 rounded-full bg-stone-200 mr-2"></div>
@@ -75,7 +99,7 @@ export default function AppDownloadSection() {
 
                   {/* Phone Screen Viewport Content */}
                   <div className="relative flex-1 bg-[#FAF9F5] rounded-[30px] sm:rounded-[34px] flex flex-col items-center justify-center p-5 sm:p-6 text-center overflow-hidden pt-10">
-                    
+
                     {/* Brand Logo Container */}
                     <div className="h-14 w-14 sm:h-20 sm:w-20 rounded-2xl bg-white shadow-sm border border-stone-200/80 flex items-center justify-center mb-3 sm:mb-4 p-3 transition-transform hover:scale-105">
                       <Image

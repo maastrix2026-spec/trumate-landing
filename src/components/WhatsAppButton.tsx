@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function WhatsAppButton() {
   const phoneNumber = "919437058654"; // Replace with your actual WhatsApp phone number with country code
-  const message = "Hello Trumate, I would like to inquire about your eco-friendly products and spices.";
+  const message = "Hello Trumate, I would like to inquire about your eco-friendly products.";
   
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 

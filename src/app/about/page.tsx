@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Leaf, Sparkles, ShieldCheck, HeartHandshake, ArrowRight } from "lucide-react";
+import { Leaf, ShieldCheck, HeartHandshake, ArrowRight, Smartphone } from "lucide-react";
 
 export default function AboutPage() {
   return (
@@ -13,31 +13,16 @@ export default function AboutPage() {
             Our Story & Mission
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-[#1C3516] tracking-tight mb-4 sm:mb-6 leading-tight">
-            Quality for Every Kitchen, Rooted in Sustainability.
+            Sustainable Tableware, Rooted in Earth-Friendly Innovation.
           </h1>
           <p className="text-sm sm:text-base md:text-lg text-stone-600 leading-relaxed font-sans px-2 sm:px-0">
-            Trumate was founded with a single vision: to bring uncompromised purity to kitchen spices while eliminating single-use plastics through 100% biodegradable tableware.
+            Trumate was founded with a clear vision: to eliminate single-use plastics and empower eco-conscious living through premium, 100% biodegradable tableware.
           </p>
         </div>
 
         {/* Feature / Value Split Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 mb-12 sm:mb-16 md:mb-20">
           
-          {/* Spices Card */}
-          <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 border border-stone-200 shadow-sm flex flex-col justify-between">
-            <div>
-              <div className="flex items-center gap-4 mb-6">
-                <div className="h-12 w-12 shrink-0 rounded-2xl bg-[#1C3516]/10 flex items-center justify-center text-[#1C3516]">
-                  <Sparkles className="size-6" />
-                </div>
-                <h3 className="text-xl sm:text-2xl font-serif text-[#1C3516]">Pure & Authentic Spices</h3>
-              </div>
-              <p className="text-xs sm:text-sm md:text-base text-stone-600 leading-relaxed font-sans">
-                We source our spices directly to preserve rich aromas, natural colors, and traditional flavors. Every packet contains zero artificial coloring or chemical preservatives—just pure kitchen goodness.
-              </p>
-            </div>
-          </div>
-
           {/* Tableware Card */}
           <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 border border-stone-200 shadow-sm flex flex-col justify-between">
             <div>
@@ -48,7 +33,22 @@ export default function AboutPage() {
                 <h3 className="text-xl sm:text-2xl font-serif text-[#1C3516]">100% Biodegradable Products</h3>
               </div>
               <p className="text-xs sm:text-sm md:text-base text-stone-600 leading-relaxed font-sans">
-                From areca palm leaf plates to bagasse containers and wooden cutlery, our eco-friendly disposables are designed for modern events and restaurants looking for zero-waste, plastic-free solutions.
+                From areca palm leaf plates to bagasse containers and natural wooden cutlery, our eco-friendly disposables are designed for modern events, homes, and restaurants looking for zero-waste, plastic-free solutions.
+              </p>
+            </div>
+          </div>
+
+          {/* Mobile App Card */}
+          <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 border border-stone-200 shadow-sm flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-4 mb-6">
+                <div className="h-12 w-12 shrink-0 rounded-2xl bg-[#1C3516]/10 flex items-center justify-center text-[#1C3516]">
+                  <Smartphone className="size-6" />
+                </div>
+                <h3 className="text-xl sm:text-2xl font-serif text-[#1C3516]">Order Seamlessly via Our App</h3>
+              </div>
+              <p className="text-xs sm:text-sm md:text-base text-stone-600 leading-relaxed font-sans">
+                Browse our complete sustainable catalog, manage bulk requirements, check live stock, and place orders directly on the go using our dedicated mobile application.
               </p>
             </div>
           </div>
@@ -60,7 +60,7 @@ export default function AboutPage() {
           <div className="text-center max-w-xl mx-auto mb-8 sm:mb-12">
             <h2 className="text-2xl md:text-3xl font-serif text-amber-100 mb-2 sm:mb-3">What Drives Us Every Day</h2>
             <p className="text-xs md:text-sm text-stone-300">
-              Our core principles ensure that every product leaving our warehouse meets the highest standards of ethics and quality.
+              Our core principles ensure that every biodegradable product leaving our warehouse meets the highest standards of quality and ecological safety.
             </p>
           </div>
 
@@ -70,7 +70,7 @@ export default function AboutPage() {
                 <ShieldCheck className="size-5" />
               </div>
               <h4 className="font-serif font-medium text-base mb-1 text-amber-100">Uncompromising Quality</h4>
-              <p className="text-xs text-stone-300 leading-relaxed">Rigorous testing on all food-service items and spices.</p>
+              <p className="text-xs text-stone-300 leading-relaxed">Rigorous testing on leak-proof durability for all food-service items.</p>
             </div>
             <div className="text-center">
               <div className="h-10 w-10 mx-auto rounded-full bg-white/10 flex items-center justify-center text-amber-200 mb-4">
@@ -84,7 +84,7 @@ export default function AboutPage() {
                 <HeartHandshake className="size-5" />
               </div>
               <h4 className="font-serif font-medium text-base mb-1 text-amber-100">Customer First</h4>
-              <p className="text-xs text-stone-300 leading-relaxed">Dedicated support for homes, restaurants, and wholesale buyers.</p>
+              <p className="text-xs text-stone-300 leading-relaxed">Dedicated support for events, catering, wholesale, and app users.</p>
             </div>
           </div>
         </div>
@@ -93,7 +93,7 @@ export default function AboutPage() {
         <div className="text-center px-2 sm:px-0">
           <h3 className="text-xl sm:text-2xl md:text-3xl font-serif text-[#1C3516] mb-3 sm:mb-4">Ready to make the switch to sustainable living?</h3>
           <p className="text-xs sm:text-sm text-stone-600 max-w-md mx-auto mb-6 sm:mb-8 font-sans">
-            Explore our range of pure kitchen spices and biodegradable tableware today.
+            Explore our eco-friendly tableware range or download our app to place your order today.
           </p>
           <div className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-4">
             <Link

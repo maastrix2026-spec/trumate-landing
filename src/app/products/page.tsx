@@ -65,7 +65,7 @@ export default function ProductsPage() {
             Sustainable Consumables & Kitchen Essentials
           </h1>
           <p className="text-xs sm:text-sm md:text-base text-stone-600 leading-relaxed font-sans px-2 sm:px-0">
-            Explore Trumate’s professional-grade eco-friendly tableware, hospitality items, and upcoming pure kitchen spices.
+            Explore Trumate’s professional-grade eco-friendly tableware, hospitality items.
           </p>
         </div>
 

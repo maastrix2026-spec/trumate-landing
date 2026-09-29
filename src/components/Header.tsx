@@ -18,9 +18,9 @@ export default function Header() {
     return (
         <header className="w-full bg-[#FAF9F5] border-b border-stone-200/60 sticky top-0 z-50 shadow-xs">
             {/* Top Announcement Bar */}
-            <div className="bg-[#1C3516] py-2 text-center text-[10px] md:text-xs font-medium tracking-[0.2em] text-amber-100 px-4">
+            {/* <div className="bg-[#1C3516] py-2 text-center text-[10px] md:text-xs font-medium tracking-[0.2em] text-amber-100 px-4">
                 FREE SHIPPING ABOVE ₹499 &nbsp;|&nbsp; USE CODE <span className="underline font-semibold">WELCOME10</span> FOR 10% OFF
-            </div>
+            </div> */}
 
             {/* Main Header Container */}
             <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 md:px-8">

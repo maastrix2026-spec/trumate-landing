@@ -6,38 +6,38 @@ import { Plus, Minus } from "lucide-react";
 const faqList = [
   {
     id: "01",
-    question: "What kinds of masalas do you sell?",
-    answer: "We offer an authentic selection of pure ground spices, whole spices, and signature kitchen spice blends sourced directly to ensure rich aroma, natural color, and traditional flavor profiles.",
-  },
-  {
-    id: "02",
-    question: "How fresh are your spices, and what's the shelf life?",
-    answer: "Our spices are hygienically packed in small batches to preserve volatile oils and freshness. They typically feature a shelf life of 12 months when stored in a cool, dry place away from direct sunlight.",
-  },
-  {
-    id: "03",
-    question: "Are your spices free from additives and preservatives?",
-    answer: "Yes, 100%. Our entire range contains zero artificial coloring, chemical preservatives, or fillers, ensuring pure, unadulterated quality for your kitchen.",
-  },
-  {
-    id: "04",
-    question: "What biodegradable tableware do you offer?",
+    question: "What types of biodegradable tableware do you offer?",
     answer: "We provide an extensive range of eco-conscious disposables including areca leaf plates, bagasse (sugarcane pulp) containers, bowls, compartment trays, and natural wooden cutlery suitable for all events.",
   },
   {
-    id: "05",
+    id: "02",
     question: "Are your biodegradable plates and spoons truly eco-friendly?",
     answer: "Absolutely. Our tableware is made from fallen palm leaves or renewable agricultural plant waste, meaning they are 100% biodegradable and compostable, returning safely to the earth without leaving microplastics.",
   },
   {
-    id: "06",
-    question: "How durable are your biodegradable spoons and plates?",
+    id: "03",
+    question: "How durable are your biodegradable plates, bowls, and cutlery?",
     answer: "They are sturdy, leak-proof, and designed to handle both hot and cold foods effortlessly. Unlike flimsy paper alternatives, our items won't get soggy easily during meals.",
   },
   {
-    id: "07",
-    question: "What sizes of biodegradable plates do you stock?",
+    id: "04",
+    question: "What sizes of biodegradable plates and trays do you stock?",
     answer: "We stock multiple sizes ranging from small snack bowls and 6-inch dessert plates to full-sized 10-inch dinner plates and multi-compartment catering trays.",
+  },
+  {
+    id: "05",
+    question: "Can I place bulk orders for catering, parties, or corporate events?",
+    answer: "Yes, we specialize in bulk and wholesale supply for restaurants, event planners, weddings, and corporate gatherings across the region with special wholesale pricing.",
+  },
+  {
+    id: "06",
+    question: "How can I place orders using your mobile app?",
+    answer: "You can download our mobile app directly from our platform to browse our complete catalog, check real-time stock availability, and place orders seamlessly on the go.",
+  },
+  {
+    id: "07",
+    question: "Do you offer delivery tracking through the mobile app?",
+    answer: "Yes, our mobile app allows you to track your eco-friendly product orders in real-time right from dispatch to your doorstep or event venue.",
   },
 ];
 
@@ -56,14 +56,14 @@ export default function FAQSection() {
         <div className="text-center mb-10 md:mb-14">
           <div className="inline-flex items-center gap-2 text-xs font-semibold tracking-[0.2em] text-[#1C3516] uppercase mb-3">
             <span className="h-px w-6 bg-[#1C3516]/40"></span>
-            EcoSpice & Tableware
+            Eco friendly products & Tableware
             <span className="h-px w-6 bg-[#1C3516]/40"></span>
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif text-[#1C3516] tracking-tight mb-3">
             Frequently Asked Questions
           </h2>
           <p className="text-xs sm:text-sm md:text-base text-stone-600 max-w-lg mx-auto leading-relaxed">
-            Everything you need to know about our spices, sustainable tableware, and eco-friendly products.
+            Everything you need to know about our sustainable tableware, and eco-friendly products.
           </p>
         </div>
 
@@ -73,10 +73,10 @@ export default function FAQSection() {
           {/* Box Header Banner */}
           <div className="bg-[#1C3516] px-5 sm:px-6 py-4 sm:py-5 md:px-8 text-amber-50">
             <h3 className="text-sm sm:text-base md:text-lg font-serif font-medium tracking-wide">
-              Spices & Sustainable Living
+              Sustainable Living
             </h3>
             <p className="text-[10px] sm:text-[11px] md:text-xs tracking-wider text-amber-200/80 font-medium uppercase mt-1">
-              Fresh Spices · Biodegradable Tableware · Eco-Conscious Living
+              Biodegradable Tableware · Eco-Conscious Living
             </p>
           </div>
 

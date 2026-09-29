@@ -15,16 +15,16 @@ const slides = [
     image: "/hero1.png",
     features: ["100% Biodegradable", "Compostable Packaging", "Sustainable Choice"],
   },
-  {
-    id: 2,
-    badge: "Available Soon",
-    title: "Quality for Every Kitchen.",
-    subtitle: "Authentic spices and dependable food-service essentials for homes and businesses across India.",
-    primaryCta: { text: "Notify Me", href: "/products?category=spices" },
-    secondaryCta: { text: "Explore Range", href: "/products" },
-    image: "/hero2.png",
-    features: ["Quality-Focused Products", "Growing Product Range", "Quality You Can Trust"],
-  },
+  // {
+  //   id: 2,
+  //   badge: "Available Soon",
+  //   title: "Quality for Every Kitchen.",
+  //   subtitle: "Authentic spices and dependable food-service essentials for homes and businesses across India.",
+  //   primaryCta: { text: "Notify Me", href: "/products?category=spices" },
+  //   secondaryCta: { text: "Explore Range", href: "/products" },
+  //   image: "/hero2.png",
+  //   features: ["Quality-Focused Products", "Growing Product Range", "Quality You Can Trust"],
+  // },
 ];
 
 const tickerItems = [

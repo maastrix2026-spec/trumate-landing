@@ -19,7 +19,7 @@ export default function BulkOrdersSection() {
               Bulk Orders, made simple.
             </h2>
             <p className="text-xs sm:text-sm md:text-base text-stone-600 max-w-2xl leading-relaxed font-sans">
-              Restaurants, caterers, retailers and event businesses get dedicated wholesale pricing, priority packing and flexible delivery schedules — on spices and disposables alike.
+              Restaurants, caterers, retailers and event businesses get dedicated wholesale pricing, priority packing and flexible delivery schedules —  disposables alike.
             </p>
           </div>
 
@@ -76,7 +76,7 @@ export default function BulkOrdersSection() {
               </div>
               <div className="h-px w-full bg-stone-200 mb-4 md:mb-5"></div>
               <p className="text-xs sm:text-sm text-stone-600 leading-relaxed mb-6 md:mb-8 font-sans">
-                Volume pricing on spices and disposables, combined into one order.
+                Volume pricing on disposables, combined into one order.
               </p>
             </div>
             <div>

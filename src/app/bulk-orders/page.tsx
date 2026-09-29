@@ -160,7 +160,7 @@ export default function BulkOrdersPage() {
             Bulk Orders, Made Simple.
           </h1>
           <p className="text-xs sm:text-sm md:text-base text-stone-600 leading-relaxed font-sans px-2 sm:px-0">
-            Equip your restaurant, café, catering business, or upcoming event with 100% biodegradable tableware and pure spices at exclusive wholesale pricing.
+            Equip your restaurant, café, catering business, or upcoming event with 100% biodegradable tableware at exclusive wholesale pricing.
           </p>
         </div>
 

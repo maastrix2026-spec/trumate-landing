@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
-    default: "Trumate | Biodegradable Tableware & Pure Spices in Bhubaneswar",
+    default: "Trumate | Biodegradable Tableware & Eco friendly products in Bhubaneswar",
     template: "%s | Trumate Bhubaneswar",
   },
   description: "Trumate provides 100% biodegradable tableware, areca palm plates, bagasse containers, and pure kitchen spices in Bhubaneswar, Odisha. Eco-friendly solutions for homes, restaurants, and events.",
