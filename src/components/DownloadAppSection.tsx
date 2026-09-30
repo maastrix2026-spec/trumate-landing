@@ -33,7 +33,7 @@ export default function AppDownloadSection() {
             window.URL.revokeObjectURL(blobUrl);
 
             toast.dismiss(loadingToast);
-            toast.success("Download started successfully!");
+            // toast.success("Download started successfully!");
           } catch (error) {
             toast.dismiss(loadingToast);
             toast.error("Download failed. Please try again.");
