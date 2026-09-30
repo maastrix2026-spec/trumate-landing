@@ -10,18 +10,34 @@ export default function AppDownloadSection() {
       description: "Get the Android APK to order eco-friendly tableware on the go.",
       action: {
         label: "Confirm Download",
-        onClick: () => {
-          // Path to your APK file (e.g., placed in the public folder like /downloads/trumate-app.apk)
-          const apkUrl = "/downloads/trumate-app.apk"; 
-          
-          const link = document.createElement("a");
-          link.href = apkUrl;
-          link.download = "trumate-app.apk";
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+        onClick: async () => {
+          const apkUrl = "/downloads/trumate-app.apk";
 
-          toast.success("Download started successfully!");
+          const loadingToast = toast.loading("Preparing download...");
+
+          try {
+            const response = await fetch(apkUrl);
+            if (!response.ok) throw new Error("Network response was not ok");
+
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+
+            const link = document.createElement("a");
+            link.href = blobUrl;
+            link.download = "trumate-app.apk";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Clean up the object URL
+            window.URL.revokeObjectURL(blobUrl);
+
+            toast.dismiss(loadingToast);
+            toast.success("Download started successfully!");
+          } catch (error) {
+            toast.dismiss(loadingToast);
+            toast.error("Download failed. Please try again.");
+          }
         },
       },
     });
