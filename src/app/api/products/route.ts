@@ -29,7 +29,29 @@ export async function POST(req: Request) {
     await connectDB();
     const body = await req.json();
 
-    const product = await Product.create(body);
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const isValidUrl = (val: unknown): val is string =>
+      typeof val === "string" &&
+      val.trim().length > 0 &&
+      (!cloudName || val.startsWith(`https://res.cloudinary.com/${cloudName}/`));
+
+    if (!isValidUrl(body.image)) {
+      return NextResponse.json(
+        { success: false, error: "Main product image URL is required" },
+        { status: 400 }
+      );
+    }
+
+    const gallery = Array.isArray(body.gallery)
+      ? body.gallery.filter(isValidUrl)
+      : [];
+
+    const product = await Product.create({
+      ...body,
+      image: body.image.trim(),
+      gallery,
+    });
+
     return NextResponse.json({ success: true, data: product }, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 400 });

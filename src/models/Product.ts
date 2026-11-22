@@ -6,10 +6,11 @@ export interface IProduct extends Document {
   description: string;
   category: mongoose.Types.ObjectId;
   price: number;
-  compareAtPrice?: number; // Original price for showing discounts
+  compareAtPrice?: number;
   stock: number;
   sku?: string;
-  images: string[]; // Array of image URLs
+  image: string;       // Main Cloudinary image URL
+  gallery: string[];   // Additional Cloudinary image URLs
   status: "Draft" | "Published" | "Out of Stock";
   isFeatured: boolean;
   createdAt: Date;
@@ -24,11 +25,12 @@ const ProductSchema = new Schema<IProduct>({
   compareAtPrice: { type: Number, min: 0 },
   stock: { type: Number, required: true, default: 0, min: 0 },
   sku: { type: String, unique: true, sparse: true },
-  images: [{ type: String }], // List of product photo links
-  status: { 
-    type: String, 
-    enum: ["Draft", "Published", "Out of Stock"], 
-    default: "Published" 
+  image: { type: String, required: true }, 
+  gallery: [{ type: String }],            
+  status: {
+    type: String,
+    enum: ["Draft", "Published", "Out of Stock"],
+    default: "Published",
   },
   isFeatured: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
