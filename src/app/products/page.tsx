@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, X, ImageOff, SlidersHorizontal } from "lucide-react";
+import Markdown from "@/components/Markdown";
+import MarkdownPreview from "@/components/MarkdownPreview";
 
 /* ---------- Types ---------- */
 
@@ -454,9 +456,9 @@ function ProductsView() {
             ) : (
               <>
                 <ul className="grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 xl:grid-cols-3">
-                  {shownProducts.map((product) => (
+                  {shownProducts.map((product, index) => (
                     <li key={product._id}>
-                      <ProductCard product={product} />
+                      <ProductCard product={product} priority={index < 3} />
                     </li>
                   ))}
                 </ul>
@@ -657,7 +659,7 @@ function PriceField({
 
 /* ---------- Product card ---------- */
 
-function ProductCard({ product }: { product: Product }) {
+function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
   const [imgFailed, setImgFailed] = useState(false);
   const live = isLive(product);
   const discount = discountPercent(product);
@@ -682,10 +684,10 @@ function ProductCard({ product }: { product: Product }) {
               alt={product.name}
               fill
               sizes={sizes}
+              loading={priority ? "eager" : "lazy"}
               onError={() => setImgFailed(true)}
-              className={`object-contain p-5 mix-blend-multiply transition-opacity duration-300 motion-reduce:transition-none ${
-                secondary ? "group-hover:opacity-0" : ""
-              } ${live ? "" : "grayscale-[40%]"}`}
+              className={`object-contain p-5 mix-blend-multiply transition-opacity duration-300 motion-reduce:transition-none ${secondary ? "group-hover:opacity-0" : ""
+                } ${live ? "" : "grayscale-[40%]"}`}
             />
             {secondary && (
               <Image
@@ -741,9 +743,9 @@ function ProductCard({ product }: { product: Product }) {
             {product.name}
           </Link>
         </h3>
-        <p className="mt-1 line-clamp-2 text-sm leading-5 text-stone-600">
+        <MarkdownPreview className="mt-1 line-clamp-2 text-sm leading-5 text-stone-600">
           {product.description}
-        </p>
+        </MarkdownPreview>
 
         <div className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
           {product.price ? (
@@ -817,11 +819,10 @@ function CategoryChip({
     <button
       onClick={onClick}
       aria-pressed={active}
-      className={`h-9 shrink-0 cursor-pointer whitespace-nowrap rounded-lg px-3.5 text-sm transition-colors ${
-        active
-          ? "bg-[#1C3516] text-white"
-          : "bg-white text-stone-700 ring-1 ring-inset ring-stone-200 hover:bg-stone-50"
-      }`}
+      className={`h-9 shrink-0 cursor-pointer whitespace-nowrap rounded-lg px-3.5 text-sm transition-colors ${active
+        ? "bg-[#1C3516] text-white"
+        : "bg-white text-stone-700 ring-1 ring-inset ring-stone-200 hover:bg-stone-50"
+        }`}
     >
       {children}
     </button>
@@ -845,9 +846,8 @@ function SidebarItem({
     <button
       onClick={onClick}
       aria-pressed={active}
-      className={`flex w-full cursor-pointer items-start justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
-        active ? "bg-[#1C3516] text-white" : "text-stone-700 hover:bg-[#E4E8DC]"
-      }`}
+      className={`flex w-full cursor-pointer items-start justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors ${active ? "bg-[#1C3516] text-white" : "text-stone-700 hover:bg-[#E4E8DC]"
+        }`}
     >
       <span>
         {label}
