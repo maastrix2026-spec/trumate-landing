@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ChevronRight, ImageOff, ArrowLeft } from "lucide-react";
+import Markdown from "@/components/Markdown";
 
 /* ---------- Types ---------- */
 
@@ -267,11 +268,10 @@ function ProductDetail({ product }: { product: Product }) {
                     </div>
 
                     {/* Short description */}
-                    {product.description && (
-                        <p className="mt-8 max-w-prose whitespace-pre-line text-[15px] leading-7 text-stone-700">
-                            {product.description}
-                        </p>
-                    )}
+                    <section className="mt-12 max-w-3xl border-t border-stone-300/70 pt-8">
+                        <h2 className="mb-4 text-xl font-semibold tracking-tight">Description</h2>
+                        <Markdown>{product.description}</Markdown>
+                    </section>
 
                     {/* Specs */}
                     <section className="mt-8">
@@ -382,8 +382,8 @@ function Gallery({ product }: { product: Product }) {
                                     aria-label={`Show image ${i + 1}`}
                                     aria-current={selected}
                                     className={`relative block aspect-square w-full cursor-pointer overflow-hidden rounded-lg bg-white transition-shadow ${selected
-                                            ? "ring-2 ring-[#1C3516]"
-                                            : "ring-1 ring-stone-200 hover:ring-stone-400"
+                                        ? "ring-2 ring-[#1C3516]"
+                                        : "ring-1 ring-stone-200 hover:ring-stone-400"
                                         }`}
                                 >
                                     <Image
