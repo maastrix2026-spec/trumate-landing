@@ -7,24 +7,67 @@ import { Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 const slides = [
   {
     id: 1,
-    badge: "Eco-Friendly Innovation",
-    title: "Eco-Friendly Food Packaging.",
-    subtitle: "Sustainable, biodegradable disposables designed for modern green businesses and sustainable living.",
-    primaryCta: { text: "Shop Disposables", href: "/products?category=biodegradables" },
-    secondaryCta: { text: "Bulk Orders", href: "/bulk-orders" },
-    image: "/hero1.png",
-    features: ["100% Biodegradable", "Compostable Packaging", "Sustainable Choice"],
+    badge: "Thoughtful Corporate Gifting",
+    title: "Corporate Gift Hampers",
+    subtitle:
+      "Make every welcome memorable with customised eco-friendly gift kits. Thoughtfully curated sustainable gifts, ideal for employee onboarding, hotels, events, and corporate celebrations.",
+    primaryCta: {
+      text: "Enquire Now",
+      href: "/bulk-orders",
+    },
+    secondaryCta: {
+      text: "Explore Gifting",
+      href: "/products",
+    },
+    image: "/hero4.png",
+    features: [
+      "Customised Gift Kits",
+      "Ideal for Hotels & Events",
+      "Sustainable & Memorable",
+    ],
   },
-  // {
-  //   id: 2,
-  //   badge: "Available Soon",
-  //   title: "Quality for Every Kitchen.",
-  //   subtitle: "Authentic spices and dependable food-service essentials for homes and businesses across India.",
-  //   primaryCta: { text: "Notify Me", href: "/products?category=spices" },
-  //   secondaryCta: { text: "Explore Range", href: "/products" },
-  //   image: "/hero2.png",
-  //   features: ["Quality-Focused Products", "Growing Product Range", "Quality You Can Trust"],
-  // },
+  {
+    id: 2,
+    badge: "Eco-Friendly Innovation",
+    title: "Eco-Friendly Plates",
+    subtitle:
+      "Make every meal sustainable with biodegradable plates and food-service essentials. A better choice for businesses, events, and everyday dining.",
+    primaryCta: {
+      text: "Shop Disposables",
+      href: "/products?category=biodegradables",
+    },
+    secondaryCta: {
+      text: "Bulk Orders",
+      href: "/bulk-orders",
+    },
+    image: "/hero3.png",
+    features: [
+      "100% Biodegradable",
+      "Made for Sustainable Living",
+      "Ideal for Food Service & Events",
+    ],
+  },
+  {
+    id: 3,
+    badge: "Packaging & Hygiene Essentials",
+    title: "Smart Packaging Solutions",
+    subtitle:
+      "Essential packaging and waste management solutions—from printed butter paper to heavy-duty garbage bags—built for commercial kitchens and businesses.",
+    primaryCta: {
+      text: "Explore Products",
+      href: "/products",
+    },
+    secondaryCta: {
+      text: "Bulk Enquiry",
+      href: "/bulk-orders",
+    },
+    image: "/hero5.png",
+    features: [
+      "Custom Butterpaper",
+      "Multi-Size Bags",
+      "Commercial Grade",
+    ],
+  }
 ];
 
 const tickerItems = [
@@ -95,13 +138,13 @@ export default function HeroCarousel() {
   };
 
   return (
-    <section 
+    <section
       className="relative w-full bg-[#faeedc] overflow-hidden select-none border-b border-stone-300/40"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
       {/* Full-Width Main Carousel Container with Drag / Touch Support */}
-      <div 
+      <div
         className="relative w-full overflow-hidden cursor-grab active:cursor-grabbing"
         onMouseDown={(e) => handleDragStart(e.clientX)}
         onMouseMove={(e) => handleDragMove(e.clientX)}
@@ -111,19 +154,19 @@ export default function HeroCarousel() {
         onTouchMove={(e) => handleDragMove(e.touches[0].clientX)}
         onTouchEnd={handleDragEnd}
       >
-        <div 
+        <div
           className="flex transition-transform duration-700 ease-out will-change-transform"
-          style={{ 
-            transform: `translateX(calc(-${currentSlide * 100}% + ${isDragging ? currentTranslate : 0}px))` 
+          style={{
+            transform: `translateX(calc(-${currentSlide * 100}% + ${isDragging ? currentTranslate : 0}px))`
           }}
         >
           {slides.map((slide) => (
-            <div 
-              key={slide.id} 
+            <div
+              key={slide.id}
               className="w-full shrink-0 grow-0 basis-full py-12 sm:py-12 md:py-26 lg:py-25 px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32 flex items-center"
             >
               <div className="mx-auto w-full max-w-7xl grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-                
+
                 {/* Left Text Column */}
                 <div className="lg:col-span-7 flex flex-col justify-center z-10 pr-0 lg:pr-8 order-2 lg:order-1">
                   {/* Badge */}
@@ -135,7 +178,7 @@ export default function HeroCarousel() {
                   <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-serif text-[#1C3516] tracking-tight leading-[1.15] sm:leading-[1.1]">
                     {slide.title}
                   </h1>
-                  
+
                   <p className="mt-4 sm:mt-5 text-sm sm:text-base md:text-lg lg:text-xl text-stone-700 max-w-xl leading-relaxed font-sans">
                     {slide.subtitle}
                   </p>
@@ -211,14 +254,13 @@ export default function HeroCarousel() {
             <button
               key={index}
               onClick={() => setCurrentSlide(index)}
-              className={`h-2 sm:h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
-                currentSlide === index ? "w-8 sm:w-10 bg-[#1C3516]" : "w-2 sm:w-2.5 bg-stone-400/60 hover:bg-stone-500"
-              }`}
+              className={`h-2 sm:h-2.5 rounded-full transition-all duration-300 cursor-pointer ${currentSlide === index ? "w-8 sm:w-10 bg-[#1C3516]" : "w-2 sm:w-2.5 bg-stone-400/60 hover:bg-stone-500"
+                }`}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}
         </div>
-        
+
         {/* Spacer to balance flex layout */}
         <div className="hidden sm:block w-20"></div>
       </div>
