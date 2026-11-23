@@ -7,25 +7,41 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
-// PUT: Update product
 export async function PUT(req: Request, { params }: RouteParams) {
   try {
     await connectDB();
     const { id } = await params;
     const body = await req.json();
 
-    const updatedProduct = await Product.findByIdAndUpdate(id, body, {
-      new: true,
+    // Strip immutable fields if sent by the client
+    const { _id, __v, createdAt, ...updateData } = body;
+
+    // Prevent duplicate key errors on sparse unique `sku` when left blank
+    if (updateData.sku === "") {
+      updateData.sku = undefined;
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(id, updateData, {
+      returnDocument: "after",
       runValidators: true,
     }).populate("category", "name slug");
 
     if (!updatedProduct) {
-      return NextResponse.json({ success: false, error: "Product not found" }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: "Product not found" },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json({ success: true, data: updatedProduct }, { status: 200 });
+    return NextResponse.json(
+      { success: true, data: updatedProduct },
+      { status: 200 }
+    );
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 400 }
+    );
   }
 }
 
