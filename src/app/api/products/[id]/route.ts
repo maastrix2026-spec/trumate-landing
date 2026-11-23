@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Product from "@/models/Product";
+import "@/models/Category";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
