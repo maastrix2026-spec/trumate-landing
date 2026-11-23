@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { useAdminAuth } from "@/context/AdminAuthContext";
-import { Lock, Mail, ShieldAlert } from "lucide-react";
+import { Lock, Mail, ShieldAlert, Eye, EyeOff } from "lucide-react";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const { login } = useAdminAuth();
 
@@ -22,13 +23,16 @@ export default function AdminLoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center p-6 bg-[#FAF9F5]">
       <div className="w-full max-w-md bg-white rounded-3xl border border-stone-200 shadow-xl p-8 md:p-10">
-        
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center size-14 rounded-2xl bg-[#1C3516]/10 text-[#1C3516] mb-3">
             <Lock className="size-6" />
           </div>
-          <h1 className="text-2xl font-serif font-bold text-[#1C3516]">Superadmin Portal</h1>
-          <p className="text-xs text-stone-500 mt-1">Enter your credentials to access the management console</p>
+          <h1 className="text-2xl font-serif font-bold text-[#1C3516]">
+            Superadmin Portal
+          </h1>
+          <p className="text-xs text-stone-500 mt-1">
+            Enter your credentials to access the management console
+          </p>
         </div>
 
         {error && (
@@ -40,7 +44,9 @@ export default function AdminLoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Admin Email</label>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">
+              Admin Email
+            </label>
             <div className="relative">
               <Mail className="absolute left-3.5 top-3.5 size-4 text-stone-400" />
               <input
@@ -55,17 +61,31 @@ export default function AdminLoginPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">Password</label>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">
+              Password
+            </label>
             <div className="relative">
               <Lock className="absolute left-3.5 top-3.5 size-4 text-stone-400" />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full rounded-xl border border-stone-300 bg-stone-50 pl-10 pr-4 py-3 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1C3516]"
+                className="w-full rounded-xl border border-stone-300 bg-stone-50 pl-10 pr-11 py-3 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1C3516]"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute right-3.5 top-3.5 text-stone-400 hover:text-stone-600"
+              >
+                {showPassword ? (
+                  <EyeOff className="size-4" />
+                ) : (
+                  <Eye className="size-4" />
+                )}
+              </button>
             </div>
           </div>
 
@@ -80,7 +100,6 @@ export default function AdminLoginPage() {
         <div className="mt-6 text-center text-xs text-stone-400">
           Protected Environment Configuration
         </div>
-
       </div>
     </div>
   );
