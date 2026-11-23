@@ -17,9 +17,15 @@ export async function GET(req: Request) {
       .populate("category", "name slug")
       .sort({ createdAt: -1 });
 
-    return NextResponse.json({ success: true, data: products }, { status: 200 });
+    return NextResponse.json(
+      { success: true, data: products },
+      { status: 200 },
+    );
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 },
+    );
   }
 }
 
@@ -33,12 +39,13 @@ export async function POST(req: Request) {
     const isValidUrl = (val: unknown): val is string =>
       typeof val === "string" &&
       val.trim().length > 0 &&
-      (!cloudName || val.startsWith(`https://res.cloudinary.com/${cloudName}/`));
+      (!cloudName ||
+        val.startsWith(`https://res.cloudinary.com/${cloudName}/`));
 
     if (!isValidUrl(body.image)) {
       return NextResponse.json(
         { success: false, error: "Main product image URL is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -46,14 +53,52 @@ export async function POST(req: Request) {
       ? body.gallery.filter(isValidUrl)
       : [];
 
+    const variants = Array.isArray(body.variants)
+      ? body.variants
+          .filter(
+            (v: any) =>
+              v && typeof v.label === "string" && v.label.trim().length > 0,
+          )
+          .map((v: any) => ({
+            label: v.label.trim(),
+            unitType: v.unitType?.trim() || undefined,
+            price: Number(v.price),
+            compareAtPrice:
+              v.compareAtPrice !== undefined && v.compareAtPrice !== ""
+                ? Number(v.compareAtPrice)
+                : undefined,
+            stock: Number(v.stock ?? 0),
+            sku: v.sku?.trim() || undefined,
+            image: isValidUrl(v.image) ? v.image.trim() : undefined,
+          }))
+      : [];
+
+    // 2. If variants exist, sync base price (lowest variant) & total stock
+    const basePrice =
+      variants.length > 0
+        ? Math.min(...variants.map((v: any) => v.price))
+        : Number(body.price);
+
+    const totalStock =
+      variants.length > 0
+        ? variants.reduce((sum: number, v: any) => sum + v.stock, 0)
+        : Number(body.stock ?? 0);
+
     const product = await Product.create({
       ...body,
+      price: basePrice,
+      stock: totalStock,
+      sku: body.sku?.trim() || undefined,
       image: body.image.trim(),
       gallery,
+      variants,
     });
 
     return NextResponse.json({ success: true, data: product }, { status: 201 });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 400 },
+    );
   }
 }

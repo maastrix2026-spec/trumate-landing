@@ -1,6 +1,14 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -16,6 +24,17 @@ type Category = {
   slug: string;
 };
 
+type ProductVariant = {
+  _id?: string;
+  label: string;
+  unitType?: string;
+  price: number;
+  compareAtPrice?: number;
+  stock?: number;
+  sku?: string;
+  image?: string;
+};
+
 type Product = {
   _id: string;
   name: string;
@@ -28,6 +47,7 @@ type Product = {
   sku?: string;
   image?: string;
   gallery?: string[];
+  variants?: ProductVariant[];
   status?: string;
   isFeatured?: boolean;
   createdAt?: string;
@@ -53,7 +73,9 @@ const inr = new Intl.NumberFormat("en-IN", {
 });
 
 const categorySlug = (p: Product) =>
-  typeof p.category === "object" && p.category ? p.category.slug : p.category ?? "";
+  typeof p.category === "object" && p.category
+    ? p.category.slug
+    : (p.category ?? "");
 
 const categoryName = (p: Product) =>
   typeof p.category === "object" && p.category ? p.category.name : "";
@@ -67,6 +89,57 @@ const discountPercent = (p: Product) =>
   p.compareAtPrice && p.price && p.compareAtPrice > p.price
     ? Math.round(((p.compareAtPrice - p.price) / p.compareAtPrice) * 100)
     : 0;
+
+function getCardPricingAndStock(p: Product) {
+  const variants = p.variants ?? [];
+
+  if (variants.length > 0) {
+    // Pick lowest-priced variant (or first in-stock variant if tied/needed)
+    const sortedByPrice = [...variants].sort((a, b) => a.price - b.price);
+    const cheapest = sortedByPrice[0];
+    const hasMultiplePrices =
+      new Set(
+        variants
+          .map((v) => v.price)
+          .filter((n) => typeof n === "number" && n > 0),
+      ).size > 1;
+
+    const effectivePrice = cheapest?.price;
+    const effectiveCompareAt = cheapest?.compareAtPrice;
+    const effectiveStock = variants.reduce(
+      (sum, v) => sum + (typeof v.stock === "number" ? v.stock : 0),
+      0,
+    );
+    const discount =
+      effectivePrice &&
+      effectiveCompareAt &&
+      effectiveCompareAt > effectivePrice
+        ? Math.round(
+            ((effectiveCompareAt - effectivePrice) / effectiveCompareAt) * 100,
+          )
+        : 0;
+
+    return {
+      price: effectivePrice,
+      compareAtPrice: effectiveCompareAt,
+      stock: effectiveStock,
+      discount,
+      isFromPrice: hasMultiplePrices,
+      variantCount: variants.length,
+    };
+  }
+
+  // Fallback for products without variants
+  const discount = discountPercent(p);
+  return {
+    price: p.price,
+    compareAtPrice: p.compareAtPrice,
+    stock: p.stock,
+    discount,
+    isFromPrice: false,
+    variantCount: 0,
+  };
+}
 
 const toNumber = (value: string | null) => {
   if (value === null || value.trim() === "") return null;
@@ -112,7 +185,7 @@ function ProductsView() {
       const qs = next.toString();
       router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     },
-    [searchParams, pathname, router]
+    [searchParams, pathname, router],
   );
 
   /* ----- Data ----- */
@@ -194,14 +267,15 @@ function ProductsView() {
 
   const priceCeiling = useMemo(
     () => Math.max(0, ...products.map((p) => p.price ?? 0)),
-    [products]
+    [products],
   );
 
   const visibleProducts = useMemo(() => {
     const query = q.trim().toLowerCase();
 
     const list = products.filter((p) => {
-      if (selectedCategory !== "all" && categorySlug(p) !== selectedCategory) return false;
+      if (selectedCategory !== "all" && categorySlug(p) !== selectedCategory)
+        return false;
       if (inStockOnly && !isAvailable(p)) return false;
       if (minPrice !== null && (p.price ?? 0) < minPrice) return false;
       if (maxPrice !== null && (p.price ?? Infinity) > maxPrice) return false;
@@ -224,14 +298,15 @@ function ProductsView() {
       case "newest":
         sorted.sort(
           (a, b) =>
-            new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
+            new Date(b.createdAt ?? 0).getTime() -
+            new Date(a.createdAt ?? 0).getTime(),
         );
         break;
       default:
         sorted.sort(
           (a, b) =>
             Number(!!b.isFeatured) - Number(!!a.isFeatured) ||
-            Number(isLive(b)) - Number(isLive(a))
+            Number(isLive(b)) - Number(isLive(a)),
         );
     }
     return sorted;
@@ -247,7 +322,9 @@ function ProductsView() {
   const activeCategory = categories.find((c) => c.slug === selectedCategory);
   const hasPriceFilter = minPrice !== null || maxPrice !== null;
   const activeFilterCount =
-    (selectedCategory !== "all" ? 1 : 0) + (inStockOnly ? 1 : 0) + (hasPriceFilter ? 1 : 0);
+    (selectedCategory !== "all" ? 1 : 0) +
+    (inStockOnly ? 1 : 0) +
+    (hasPriceFilter ? 1 : 0);
   const hasFilters = activeFilterCount > 0 || q.trim() !== "";
 
   const clearFilters = () => {
@@ -259,7 +336,8 @@ function ProductsView() {
 
   useEffect(() => {
     if (!sheetOpen) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setSheetOpen(false);
+    const onKey = (e: KeyboardEvent) =>
+      e.key === "Escape" && setSheetOpen(false);
     document.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -274,7 +352,8 @@ function ProductsView() {
     counts,
     total: products.length,
     selectedCategory,
-    onCategory: (slug: string) => setParams({ category: slug === "all" ? null : slug }),
+    onCategory: (slug: string) =>
+      setParams({ category: slug === "all" ? null : slug }),
     inStockOnly,
     onInStock: (value: boolean) => setParams({ stock: value ? "1" : null }),
     minInput,
@@ -294,8 +373,8 @@ function ProductsView() {
             Eco tableware and kitchen supplies for hospitality
           </h1>
           <p className="mt-3 text-sm leading-6 text-stone-600 sm:text-base">
-            Compostable plates, bowls, cutlery and housekeeping consumables, supplied in
-            bulk to restaurants, caterers and hotels.
+            Compostable plates, bowls, cutlery and housekeeping consumables,
+            supplied in bulk to restaurants, caterers and hotels.
           </p>
         </header>
 
@@ -331,14 +410,19 @@ function ProductsView() {
               )}
             </button>
 
-            <label htmlFor="sort" className="ml-auto hidden text-sm text-stone-500 sm:block">
+            <label
+              htmlFor="sort"
+              className="ml-auto hidden text-sm text-stone-500 sm:block"
+            >
               Sort by
             </label>
             <select
               id="sort"
               value={sort}
               onChange={(e) =>
-                setParams({ sort: e.target.value === "featured" ? null : e.target.value })
+                setParams({
+                  sort: e.target.value === "featured" ? null : e.target.value,
+                })
               }
               className="h-11 flex-1 rounded-lg border border-stone-300 bg-white px-3 text-sm outline-none focus:border-[#1C3516] focus-visible:ring-2 focus-visible:ring-[#1C3516]/20 sm:flex-none"
             >
@@ -418,7 +502,10 @@ function ProductsView() {
                       />
                     )}
                     {inStockOnly && (
-                      <FilterTag label="In stock" onRemove={() => setParams({ stock: null })} />
+                      <FilterTag
+                        label="In stock"
+                        onRemove={() => setParams({ stock: null })}
+                      />
                     )}
                     {hasPriceFilter && (
                       <FilterTag
@@ -486,7 +573,9 @@ function ProductsView() {
       {sheetOpen && (
         <div
           className="fixed inset-0 z-50 flex items-end bg-stone-900/50 lg:hidden"
-          onMouseDown={(e) => e.target === e.currentTarget && setSheetOpen(false)}
+          onMouseDown={(e) =>
+            e.target === e.currentTarget && setSheetOpen(false)
+          }
         >
           <div
             role="dialog"
@@ -521,7 +610,8 @@ function ProductsView() {
                 }}
                 className="h-11 flex-1 cursor-pointer rounded-lg bg-[#1C3516] text-sm font-medium text-white"
               >
-                Show {visibleProducts.length} {visibleProducts.length === 1 ? "product" : "products"}
+                Show {visibleProducts.length}{" "}
+                {visibleProducts.length === 1 ? "product" : "products"}
               </button>
             </div>
           </div>
@@ -551,7 +641,8 @@ type FilterPanelProps = {
 };
 
 function FilterPanel(props: FilterPanelProps) {
-  const onEnter = (e: React.KeyboardEvent) => e.key === "Enter" && props.onApplyPrice();
+  const onEnter = (e: React.KeyboardEvent) =>
+    e.key === "Enter" && props.onApplyPrice();
 
   return (
     <div className="space-y-7">
@@ -609,7 +700,9 @@ function FilterPanel(props: FilterPanelProps) {
           <span className="text-stone-400">to</span>
           <PriceField
             label="Maximum price"
-            placeholder={props.priceCeiling ? String(props.priceCeiling) : "Max"}
+            placeholder={
+              props.priceCeiling ? String(props.priceCeiling) : "Max"
+            }
             value={props.maxInput}
             onChange={props.onMaxInput}
             onBlur={props.onApplyPrice}
@@ -659,13 +752,31 @@ function PriceField({
 
 /* ---------- Product card ---------- */
 
-function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
+function ProductCard({
+  product,
+  priority = false,
+}: {
+  product: Product;
+  priority?: boolean;
+}) {
   const [imgFailed, setImgFailed] = useState(false);
   const live = isLive(product);
-  const discount = discountPercent(product);
-  const outOfStock = live && product.stock !== undefined && product.stock <= 0;
+
+  const {
+    price: displayPrice,
+    compareAtPrice: displayCompareAt,
+    stock: displayStock,
+    discount,
+    isFromPrice,
+    variantCount,
+  } = getCardPricingAndStock(product);
+
+  const outOfStock = live && displayStock !== undefined && displayStock <= 0;
   const lowStock =
-    live && product.stock !== undefined && product.stock > 0 && product.stock <= 10;
+    live &&
+    displayStock !== undefined &&
+    displayStock > 0 &&
+    displayStock <= 10;
 
   const primary = product.image || product.gallery?.[0];
   const secondary = product.gallery?.find((src) => src !== primary);
@@ -686,8 +797,9 @@ function ProductCard({ product, priority = false }: { product: Product; priority
               sizes={sizes}
               loading={priority ? "eager" : "lazy"}
               onError={() => setImgFailed(true)}
-              className={`object-contain p-5 mix-blend-multiply transition-opacity duration-300 motion-reduce:transition-none ${secondary ? "group-hover:opacity-0" : ""
-                } ${live ? "" : "grayscale-[40%]"}`}
+              className={`object-contain p-5 mix-blend-multiply transition-opacity duration-300 motion-reduce:transition-none ${
+                secondary ? "group-hover:opacity-0" : ""
+              } ${live ? "" : "grayscale-[40%]"}`}
             />
             {secondary && (
               <Image
@@ -748,12 +860,17 @@ function ProductCard({ product, priority = false }: { product: Product; priority
         </MarkdownPreview>
 
         <div className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-          {product.price ? (
+          {displayPrice ? (
             <>
-              <span className="text-lg font-semibold">{inr.format(product.price)}</span>
-              {discount > 0 && (
+              {isFromPrice && (
+                <span className="text-xs font-medium text-stone-500">From</span>
+              )}
+              <span className="text-lg font-semibold">
+                {inr.format(displayPrice)}
+              </span>
+              {discount > 0 && displayCompareAt && (
                 <span className="text-sm text-stone-400 line-through">
-                  {inr.format(product.compareAtPrice!)}
+                  {inr.format(displayCompareAt)}
                 </span>
               )}
               <span className="text-xs text-stone-500">per unit</span>
@@ -761,10 +878,18 @@ function ProductCard({ product, priority = false }: { product: Product; priority
           ) : (
             <span className="text-sm text-stone-600">Price on request</span>
           )}
+
+          {variantCount > 0 && (
+            <span className="text-xs font-medium text-stone-500">
+              ({variantCount} {variantCount === 1 ? "variant" : "variants"})
+            </span>
+          )}
         </div>
 
         {lowStock && (
-          <p className="mt-1 text-xs font-medium text-amber-700">Only {product.stock} left</p>
+          <p className="mt-1 text-xs font-medium text-amber-700">
+            Only {displayStock} left
+          </p>
         )}
 
         <div className="mt-auto pt-4">
@@ -791,7 +916,13 @@ function ProductCard({ product, priority = false }: { product: Product; priority
 
 /* ---------- Small pieces ---------- */
 
-function FilterTag({ label, onRemove }: { label: string; onRemove: () => void }) {
+function FilterTag({
+  label,
+  onRemove,
+}: {
+  label: string;
+  onRemove: () => void;
+}) {
   return (
     <li>
       <button
@@ -819,10 +950,11 @@ function CategoryChip({
     <button
       onClick={onClick}
       aria-pressed={active}
-      className={`h-9 shrink-0 cursor-pointer whitespace-nowrap rounded-lg px-3.5 text-sm transition-colors ${active
-        ? "bg-[#1C3516] text-white"
-        : "bg-white text-stone-700 ring-1 ring-inset ring-stone-200 hover:bg-stone-50"
-        }`}
+      className={`h-9 shrink-0 cursor-pointer whitespace-nowrap rounded-lg px-3.5 text-sm transition-colors ${
+        active
+          ? "bg-[#1C3516] text-white"
+          : "bg-white text-stone-700 ring-1 ring-inset ring-stone-200 hover:bg-stone-50"
+      }`}
     >
       {children}
     </button>
@@ -846,18 +978,23 @@ function SidebarItem({
     <button
       onClick={onClick}
       aria-pressed={active}
-      className={`flex w-full cursor-pointer items-start justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors ${active ? "bg-[#1C3516] text-white" : "text-stone-700 hover:bg-[#E4E8DC]"
-        }`}
+      className={`flex w-full cursor-pointer items-start justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+        active ? "bg-[#1C3516] text-white" : "text-stone-700 hover:bg-[#E4E8DC]"
+      }`}
     >
       <span>
         {label}
         {note && (
-          <span className={`block text-xs ${active ? "text-white/70" : "text-stone-500"}`}>
+          <span
+            className={`block text-xs ${active ? "text-white/70" : "text-stone-500"}`}
+          >
             {note}
           </span>
         )}
       </span>
-      <span className={`tabular-nums ${active ? "text-white/70" : "text-stone-400"}`}>
+      <span
+        className={`tabular-nums ${active ? "text-white/70" : "text-stone-400"}`}
+      >
         {count}
       </span>
     </button>

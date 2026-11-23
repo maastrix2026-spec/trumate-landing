@@ -57,6 +57,12 @@ export default function ProductsManagementPage() {
       throw new Error(errorJson.message || "Failed to save product");
     }
 
+    if (method=="POST"){
+      toast.success("Product Created.")
+    }else{
+      toast.success("Product Updated.")
+    }
+
     await fetchData();
   };
 
