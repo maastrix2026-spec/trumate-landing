@@ -12,6 +12,7 @@ import {
   type Permission,
 } from "@/lib/iam";
 import connectDB from "@/lib/db";
+import { recordAuditLog } from "@/lib/audit";
 
 const ALLOWED_ROLES = new Set<string>(ROLES);
 const VALID_PERMISSIONS = new Set<string>(PERMISSIONS);
@@ -76,6 +77,11 @@ export async function PATCH(
   req: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
+  let actorForError:
+    | { id: string; name: string; email: string; role: string }
+    | undefined;
+  let targetIdForError: string | null = null;
+
   try {
     const auth = await requirePermission("users:manage");
     if (!auth.ok) {
@@ -84,8 +90,10 @@ export async function PATCH(
         { status: auth.status },
       );
     }
+    actorForError = auth.user;
 
     const { id } = await context.params;
+    targetIdForError = id;
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { success: false, message: "Invalid user ID" },
@@ -104,6 +112,14 @@ export async function PATCH(
       );
     }
 
+    // 1. Capture original state before any mutations
+    const beforeSnapshot = {
+      name: target.name,
+      role: target.role,
+      extraPermissions: [...((target.extraPermissions ?? []) as string[])],
+      isActive: target.isActive,
+    };
+
     const canManageRoles =
       auth.user.role === "superadmin" ||
       hasPermission(auth.user.permissions, "roles:manage");
@@ -120,6 +136,21 @@ export async function PATCH(
         );
       }
       if (body.role === "superadmin" && !canManageRoles) {
+        await recordAuditLog({
+          req,
+          actor: auth.user,
+          action: "admin_user.update",
+          requiredPermission: "roles:manage",
+          outcome: "denied",
+          statusCode: 403,
+          errorMessage:
+            "Missing roles:manage permission to assign superadmin role",
+          targetType: "AdminUser",
+          targetId: String(target._id),
+          targetLabel: target.email,
+          before: beforeSnapshot,
+          after: { attemptedRole: body.role },
+        });
         return NextResponse.json(
           {
             success: false,
@@ -140,40 +171,55 @@ export async function PATCH(
         ? body.permissions
         : null;
 
-    if (incomingPerms !== null) {
-      if (target.role === "superadmin") {
-        target.extraPermissions = [];
-      } else {
-        const baseRoleSet = new Set<string>(
-          ROLE_PERMISSIONS[target.role as AdminRole] ?? [],
-        );
+    const baseRoleSet = new Set<string>(
+      ROLE_PERMISSIONS[target.role as AdminRole] ?? [],
+    );
 
-        const cleanExtras = Array.from(
-          new Set<Permission>(
-            incomingPerms.filter(
-              (p): p is Permission =>
-                typeof p === "string" &&
-                VALID_PERMISSIONS.has(p) &&
-                !baseRoleSet.has(p),
-            ),
-          ),
-        );
-
-        const nextEffective = getEffectivePermissions(target.role, cleanExtras);
-        if (nextEffective.includes("roles:manage") && !canManageRoles) {
-          return NextResponse.json(
-            {
-              success: false,
-              message: "Missing roles:manage permission to grant roles:manage",
-            },
-            { status: 403 },
-          );
-        }
-
-        target.extraPermissions = cleanExtras;
-      }
-    } else if (target.role === "superadmin") {
+    if (target.role === "superadmin") {
       target.extraPermissions = [];
+    } else if (incomingPerms !== null) {
+      const cleanExtras = Array.from(
+        new Set<Permission>(
+          incomingPerms.filter(
+            (p): p is Permission =>
+              typeof p === "string" &&
+              VALID_PERMISSIONS.has(p) &&
+              !baseRoleSet.has(p),
+          ),
+        ),
+      );
+
+      const nextEffective = getEffectivePermissions(target.role, cleanExtras);
+      if (nextEffective.includes("roles:manage") && !canManageRoles) {
+        await recordAuditLog({
+          req,
+          actor: auth.user,
+          action: "admin_user.update",
+          requiredPermission: "roles:manage",
+          outcome: "denied",
+          statusCode: 403,
+          errorMessage: "Missing roles:manage permission to grant roles:manage",
+          targetType: "AdminUser",
+          targetId: String(target._id),
+          targetLabel: target.email,
+          before: beforeSnapshot,
+          after: { attemptedExtraPermissions: cleanExtras },
+        });
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Missing roles:manage permission to grant roles:manage",
+          },
+          { status: 403 },
+        );
+      }
+
+      target.extraPermissions = cleanExtras;
+    } else {
+      // Role may have changed without explicit permissions payload: prune duplicates
+      target.extraPermissions = (
+        (target.extraPermissions ?? []) as Permission[]
+      ).filter((p) => !baseRoleSet.has(p));
     }
 
     if (typeof body?.isActive === "boolean") {
@@ -186,7 +232,9 @@ export async function PATCH(
       target.isActive = body.isActive;
     }
 
-    if (typeof body?.password === "string" && body.password.length > 0) {
+    const passwordRotated =
+      typeof body?.password === "string" && body.password.length > 0;
+    if (passwordRotated) {
       if (body.password.length < 8) {
         return NextResponse.json(
           {
@@ -202,6 +250,28 @@ export async function PATCH(
     await target.save();
 
     const extraPermissions = (target.extraPermissions ?? []) as Permission[];
+
+    const afterSnapshot = {
+      name: target.name,
+      role: target.role,
+      extraPermissions: [...extraPermissions],
+      isActive: target.isActive,
+      passwordRotated,
+    };
+
+    await recordAuditLog({
+      req,
+      actor: auth.user,
+      action: "admin_user.update",
+      requiredPermission: "users:manage",
+      outcome: "success",
+      statusCode: 200,
+      targetType: "AdminUser",
+      targetId: String(target._id),
+      targetLabel: target.email,
+      before: beforeSnapshot,
+      after: afterSnapshot,
+    });
 
     return NextResponse.json({
       success: true,
@@ -219,6 +289,18 @@ export async function PATCH(
     });
   } catch (err) {
     console.error("Update admin user error:", err);
+    await recordAuditLog({
+      req,
+      actor: actorForError,
+      action: "admin_user.update",
+      requiredPermission: "users:manage",
+      outcome: "failure",
+      statusCode: 500,
+      errorMessage:
+        err instanceof Error ? err.message : "Failed to update user",
+      targetType: "AdminUser",
+      targetId: targetIdForError,
+    });
     return NextResponse.json(
       { success: false, message: "Failed to update user" },
       { status: 500 },
@@ -227,19 +309,26 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _req: NextRequest,
+  req: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
+  let actorForError:
+    | { id: string; name: string; email: string; role: string }
+    | undefined;
+  let targetIdForError: string | null = null;
+
   try {
     const auth = await requirePermission("users:manage");
     if (!auth.ok) {
       return NextResponse.json(
         { success: false, message: auth.error },
-        { status: 401 },
+        { status: auth.status },
       );
     }
+    actorForError = auth.user;
 
     const { id } = await context.params;
+    targetIdForError = id;
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { success: false, message: "Invalid user ID" },
@@ -248,6 +337,18 @@ export async function DELETE(
     }
 
     if (id === auth.user.id) {
+      await recordAuditLog({
+        req,
+        actor: auth.user,
+        action: "admin_user.soft_delete",
+        requiredPermission: "users:manage",
+        outcome: "denied",
+        statusCode: 400,
+        errorMessage: "Attempted to delete own account",
+        targetType: "AdminUser",
+        targetId: id,
+        targetLabel: auth.user.email,
+      });
       return NextResponse.json(
         { success: false, message: "You cannot delete your own account" },
         { status: 400 },
@@ -255,20 +356,104 @@ export async function DELETE(
     }
 
     await connectDB();
-    const deleted = await AdminUser.findByIdAndDelete(id).lean();
-    if (!deleted) {
+    const target = await AdminUser.findById(id);
+    if (!target) {
       return NextResponse.json(
         { success: false, message: "User not found" },
         { status: 404 },
       );
     }
 
+    const canManageRoles =
+      auth.user.role === "superadmin" ||
+      hasPermission(auth.user.permissions, "roles:manage");
+
+    if (target.role === "superadmin" && !canManageRoles) {
+      await recordAuditLog({
+        req,
+        actor: auth.user,
+        action: "admin_user.soft_delete",
+        requiredPermission: "roles:manage",
+        outcome: "denied",
+        statusCode: 403,
+        errorMessage:
+          "Missing roles:manage permission to delete superadmin account",
+        targetType: "AdminUser",
+        targetId: String(target._id),
+        targetLabel: target.email,
+        before: {
+          name: target.name,
+          role: target.role,
+          extraPermissions: [...((target.extraPermissions ?? []) as string[])],
+          isActive: target.isActive,
+        },
+      });
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Missing roles:manage permission to remove a superadmin account",
+        },
+        { status: 403 },
+      );
+    }
+
+    const beforeSnapshot = {
+      name: target.name,
+      role: target.role,
+      extraPermissions: [...((target.extraPermissions ?? []) as string[])],
+      isActive: target.isActive,
+    };
+
+    target.isActive = false;
+    await target.save();
+
+    const afterSnapshot = {
+      name: target.name,
+      role: target.role,
+      extraPermissions: [...((target.extraPermissions ?? []) as string[])],
+      isActive: target.isActive,
+    };
+
+    await recordAuditLog({
+      req,
+      actor: auth.user,
+      action: "admin_user.soft_delete",
+      requiredPermission: "users:manage",
+      outcome: "success",
+      statusCode: 200,
+      targetType: "AdminUser",
+      targetId: String(target._id),
+      targetLabel: target.email,
+      before: beforeSnapshot,
+      after: afterSnapshot,
+    });
+
     return NextResponse.json({
       success: true,
-      message: "User deleted",
+      message: "User deactivated (soft deleted)",
+      user: {
+        id: String(target._id),
+        name: target.name,
+        email: target.email,
+        role: target.role,
+        isActive: target.isActive,
+      },
     });
   } catch (err) {
-    console.error("Delete admin user error:", err);
+    console.error("Soft delete admin user error:", err);
+    await recordAuditLog({
+      req,
+      actor: actorForError,
+      action: "admin_user.soft_delete",
+      requiredPermission: "users:manage",
+      outcome: "failure",
+      statusCode: 500,
+      errorMessage:
+        err instanceof Error ? err.message : "Failed to delete user",
+      targetType: "AdminUser",
+      targetId: targetIdForError,
+    });
     return NextResponse.json(
       { success: false, message: "Failed to delete user" },
       { status: 500 },
