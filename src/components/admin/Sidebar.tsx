@@ -14,6 +14,7 @@ import {
   ExternalLink,
   LogOut,
   ShieldCheck,
+  BadgeCheck,
 } from "lucide-react";
 import { useAdminAuth } from "@/context/AdminAuthContext";
 import type { Permission } from "@/lib/iam";
@@ -177,14 +178,30 @@ export default function Sidebar() {
       {/* Footer */}
       <div className="space-y-2 border-t border-zinc-800/80 p-3">
         {user && (
-          <div className="rounded-lg bg-zinc-900/70 px-3 py-2">
-            <p className="truncate text-xs font-medium text-zinc-200">
-              {user.name}
-            </p>
-            <p className="truncate font-mono text-[11px] text-zinc-500">
-              {user.role}
-            </p>
-          </div>
+          <Link
+            href="/superadmin/dashboard/profile"
+            className={`group flex items-center justify-between gap-2 rounded-lg border px-3 py-2 transition-colors ${
+              pathname === "/superadmin/dashboard/profile"
+                ? "border-emerald-500/30 bg-white/[0.09] text-white"
+                : "border-zinc-800/80 bg-zinc-900/70 hover:border-zinc-700 hover:bg-zinc-900"
+            }`}
+          >
+            <div className="min-w-0">
+              <p className="truncate text-xs font-medium text-zinc-200 group-hover:text-white">
+                {user.name}
+              </p>
+              <p className="truncate font-mono text-[11px] text-zinc-500 group-hover:text-zinc-400">
+                {user.role}
+              </p>
+            </div>
+            <BadgeCheck
+              className={`h-4 w-4 shrink-0 transition-colors ${
+                pathname === "/superadmin/dashboard/profile"
+                  ? "text-emerald-400"
+                  : "text-zinc-500 group-hover:text-zinc-300"
+              }`}
+            />
+          </Link>
         )}
 
         <div className="space-y-0.5">
