@@ -3,11 +3,13 @@ import { Inter, Geist } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "sonner";
+import { GoogleTagManager } from "@next/third-parties/google";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 const inter = Inter({ subsets: ["latin"] });
 
-const SITE_URL = "https://www.trumategroup.com"; 
+const SITE_URL = "https://www.trumategroup.com";
+const gtmId = process.env.NEXT_PUBLIC_GTM_ID; 
 
 export const metadata: Metadata = {
   title: {
@@ -114,6 +116,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={cn("font-sans", geist.variable)}>
+      {gtmId && <GoogleTagManager gtmId={gtmId} />}
       <body className={inter.className}>
         <script
           type="application/ld+json"
