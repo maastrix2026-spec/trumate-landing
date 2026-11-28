@@ -11,6 +11,7 @@ import {
   type Permission,
 } from "@/lib/iam";
 import connectDB from "@/lib/db";
+import { recordAuditLog } from "@/lib/audit";
 
 const ALLOWED_ROLES = new Set<string>(ROLES);
 const VALID_PERMISSIONS = new Set<string>(PERMISSIONS);
@@ -58,6 +59,11 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  let actorForError:
+    | { id: string; name: string; email: string; role: string }
+    | undefined;
+  let targetEmailForError: string | null = null;
+
   try {
     const auth = await requirePermission("users:manage");
     if (!auth.ok) {
@@ -66,6 +72,7 @@ export async function POST(req: NextRequest) {
         { status: auth.status },
       );
     }
+    actorForError = auth.user;
 
     const body = await req.json();
     const name = typeof body?.name === "string" ? body.name.trim() : "";
@@ -74,6 +81,7 @@ export async function POST(req: NextRequest) {
     const password = typeof body?.password === "string" ? body.password : "";
     const role = typeof body?.role === "string" ? body.role : "viewer";
     const isActive = typeof body?.isActive === "boolean" ? body.isActive : true;
+    targetEmailForError = email || null;
 
     if (!name || !email || password.length < 8) {
       return NextResponse.json(
@@ -97,6 +105,19 @@ export async function POST(req: NextRequest) {
       hasPermission(auth.user.permissions, "roles:manage");
 
     if (role === "superadmin" && !canManageRoles) {
+      await recordAuditLog({
+        req,
+        actor: auth.user,
+        action: "admin_user.create",
+        requiredPermission: "roles:manage",
+        outcome: "denied",
+        statusCode: 403,
+        errorMessage:
+          "Missing roles:manage permission to assign superadmin role",
+        targetType: "AdminUser",
+        targetLabel: email,
+        after: { name, email, role, isActive },
+      });
       return NextResponse.json(
         {
           success: false,
@@ -131,9 +152,30 @@ export async function POST(req: NextRequest) {
             ),
           );
 
-    const effectivePermissions = getEffectivePermissions(role, extraPermissions);
+    const effectivePermissions = getEffectivePermissions(
+      role,
+      extraPermissions,
+    );
 
     if (effectivePermissions.includes("roles:manage") && !canManageRoles) {
+      await recordAuditLog({
+        req,
+        actor: auth.user,
+        action: "admin_user.create",
+        requiredPermission: "roles:manage",
+        outcome: "denied",
+        statusCode: 403,
+        errorMessage: "Missing roles:manage permission to grant roles:manage",
+        targetType: "AdminUser",
+        targetLabel: email,
+        after: {
+          name,
+          email,
+          role,
+          extraPermissions,
+          isActive,
+        },
+      });
       return NextResponse.json(
         {
           success: false,
@@ -162,6 +204,27 @@ export async function POST(req: NextRequest) {
       isActive,
     });
 
+    await recordAuditLog({
+      req,
+      actor: auth.user,
+      action: "admin_user.create",
+      requiredPermission: "users:manage",
+      outcome: "success",
+      statusCode: 201,
+      targetType: "AdminUser",
+      targetId: String(created._id),
+      targetLabel: created.email,
+      before: null,
+      after: {
+        name: created.name,
+        email: created.email,
+        role: created.role,
+        extraPermissions: created.extraPermissions ?? [],
+        permissions: effectivePermissions,
+        isActive: created.isActive,
+      },
+    });
+
     return NextResponse.json(
       {
         success: true,
@@ -180,6 +243,18 @@ export async function POST(req: NextRequest) {
     );
   } catch (err) {
     console.error("Create admin user error:", err);
+    await recordAuditLog({
+      req,
+      actor: actorForError,
+      action: "admin_user.create",
+      requiredPermission: "users:manage",
+      outcome: "failure",
+      statusCode: 500,
+      errorMessage:
+        err instanceof Error ? err.message : "Failed to create admin user",
+      targetType: "AdminUser",
+      targetLabel: targetEmailForError,
+    });
     return NextResponse.json(
       { success: false, message: "Failed to create admin user" },
       { status: 500 },

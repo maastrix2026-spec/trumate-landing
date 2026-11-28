@@ -22,6 +22,7 @@ export const PERMISSIONS = [
   "orders:refund",
   "analytics:read",
   "settings:manage",
+  "audit:read",
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];

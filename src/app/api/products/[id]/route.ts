@@ -1,17 +1,65 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import mongoose from "mongoose";
 import connectDB from "@/lib/db";
 import Product from "@/models/Product";
 import "@/models/Category";
+import { requirePermission } from "@/lib/auth";
+import { recordAuditLog } from "@/lib/audit";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
-export async function PUT(req: Request, { params }: RouteParams) {
+function buildProductSnapshot(product: any) {
+  return {
+    name: product.name ?? null,
+    sku: product.sku ?? null,
+    category: product.category ? String(product.category) : null,
+    price: product.price ?? null,
+    stock: product.stock ?? null,
+    variantCount: Array.isArray(product.variants) ? product.variants.length : 0,
+    isActive: product.isActive ?? null,
+  };
+}
+
+export async function PUT(req: NextRequest, { params }: RouteParams) {
+  let actorForError:
+    | { id: string; name: string; email: string; role: string }
+    | undefined;
+  let targetIdForError: string | null = null;
+
   try {
+    const auth = await requirePermission("products:write");
+    if (!auth.ok) {
+      return NextResponse.json(
+        { success: false, error: auth.error },
+        { status: auth.status },
+      );
+    }
+    actorForError = auth.user;
+
     await connectDB();
     const { id } = await params;
+    targetIdForError = id;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { success: false, error: "Invalid product ID" },
+        { status: 400 },
+      );
+    }
+
+    const existingProduct = await Product.findById(id).lean();
+    if (!existingProduct) {
+      return NextResponse.json(
+        { success: false, error: "Product not found" },
+        { status: 404 },
+      );
+    }
+
+    const beforeSnapshot = buildProductSnapshot(existingProduct);
+
     const body = await req.json();
 
     // Strip immutable fields if sent by the client
@@ -81,25 +129,75 @@ export async function PUT(req: Request, { params }: RouteParams) {
       );
     }
 
+    await recordAuditLog({
+      req,
+      actor: auth.user,
+      action: "product.update",
+      requiredPermission: "products:write",
+      outcome: "success",
+      statusCode: 200,
+      targetType: "Product",
+      targetId: String(updatedProduct._id),
+      targetLabel:
+        updatedProduct.sku || updatedProduct.name || String(updatedProduct._id),
+      before: beforeSnapshot,
+      after: buildProductSnapshot(updatedProduct),
+    });
+
     return NextResponse.json(
       { success: true, data: updatedProduct },
       { status: 200 },
     );
   } catch (error: any) {
+    const statusCode = error?.name === "ValidationError" ? 400 : 500;
+    await recordAuditLog({
+      req,
+      actor: actorForError,
+      action: "product.update",
+      requiredPermission: "products:write",
+      outcome: "failure",
+      statusCode,
+      errorMessage: error?.message || "Failed to update product",
+      targetType: "Product",
+      targetId: targetIdForError,
+    });
+
     return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 400 },
+      { success: false, error: error?.message || "Failed to update product" },
+      { status: statusCode },
     );
   }
 }
 
 // DELETE: Remove product
-export async function DELETE(req: Request, { params }: RouteParams) {
+export async function DELETE(req: NextRequest, { params }: RouteParams) {
+  let actorForError:
+    | { id: string; name: string; email: string; role: string }
+    | undefined;
+  let targetIdForError: string | null = null;
+
   try {
+    const auth = await requirePermission("products:write");
+    if (!auth.ok) {
+      return NextResponse.json(
+        { success: false, error: auth.error },
+        { status: auth.status },
+      );
+    }
+    actorForError = auth.user;
+
     await connectDB();
     const { id } = await params;
+    targetIdForError = id;
 
-    const deletedProduct = await Product.findByIdAndDelete(id);
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { success: false, error: "Invalid product ID" },
+        { status: 400 },
+      );
+    }
+
+    const deletedProduct = await Product.findByIdAndDelete(id).lean();
 
     if (!deletedProduct) {
       return NextResponse.json(
@@ -108,13 +206,42 @@ export async function DELETE(req: Request, { params }: RouteParams) {
       );
     }
 
+    await recordAuditLog({
+      req,
+      actor: auth.user,
+      action: "product.delete",
+      requiredPermission: "products:write",
+      outcome: "success",
+      statusCode: 200,
+      targetType: "Product",
+      targetId: String(deletedProduct._id),
+      targetLabel:
+        deletedProduct.sku ||
+        deletedProduct.name ||
+        String(deletedProduct._id),
+      before: buildProductSnapshot(deletedProduct),
+      after: null,
+    });
+
     return NextResponse.json(
       { success: true, message: "Product deleted successfully" },
       { status: 200 },
     );
   } catch (error: any) {
+    await recordAuditLog({
+      req,
+      actor: actorForError,
+      action: "product.delete",
+      requiredPermission: "products:write",
+      outcome: "failure",
+      statusCode: 500,
+      errorMessage: error?.message || "Failed to delete product",
+      targetType: "Product",
+      targetId: targetIdForError,
+    });
+
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: error?.message || "Failed to delete product" },
       { status: 500 },
     );
   }
