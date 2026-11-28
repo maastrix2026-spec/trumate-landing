@@ -1,75 +1,154 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import { useRouter, usePathname } from "next/navigation";
+import {
+  hasAnyPermission,
+  hasPermission,
+  type Permission,
+} from "@/lib/iam";
 
-interface AdminAuthContextType {
-    isAuthenticated: boolean;
-    login: (user: string, pass: string) => boolean;
-    logout: () => void;
+export interface SessionUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  extraPermissions?: Permission[];
+  permissions: Permission[];
 }
 
-const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefined);
+interface LoginResult {
+  ok: boolean;
+  error?: string;
+}
+
+interface AdminAuthContextType {
+  user: SessionUser | null;
+  isAuthenticated: boolean;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<LoginResult>;
+  logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
+  can: (permission: Permission) => boolean;
+  canAny: (permissions: Permission[]) => boolean;
+}
+
+const AdminAuthContext = createContext<AdminAuthContextType | undefined>(
+  undefined
+);
 
 export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-    const [loading, setLoading] = useState<boolean>(true);
-    const router = useRouter();
-    const pathname = usePathname();
+  const [user, setUser] = useState<SessionUser | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const router = useRouter();
+  const pathname = usePathname();
 
-    useEffect(() => {
-        // Check local storage for session
-        const authStatus = localStorage.getItem("superadmin_logged_in");
-        if (authStatus === "true") {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
-            setIsAuthenticated(true);
-        }
-        setLoading(false);
-    }, []);
+  const refreshUser = useCallback(async () => {
+    try {
+      const res = await fetch("/api/auth/me", { cache: "no-store" });
+      if (!res.ok) {
+        setUser(null);
+        return;
+      }
+      const data = await res.json();
+      setUser(data.success ? data.user ?? null : null);
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-    useEffect(() => {
-        if (!loading) {
-            const isLoginPage = pathname === "/superadmin/login";
-            const isSuperadminRoute = pathname.startsWith("/superadmin");
+  useEffect(() => {
+    refreshUser();
+  }, [refreshUser]);
 
-            if (isSuperadminRoute && !isLoginPage && !isAuthenticated) {
-                router.push("/superadmin/login");
-            } else if (isLoginPage && isAuthenticated) {
-                router.push("/superadmin/dashboard");
-            }
-        }
-    }, [isAuthenticated, pathname, loading, router]);
+  const isAuthenticated = Boolean(user);
 
-    const login = (user: string, pass: string) => {
-        const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || "admin@trumate.com";
-        const adminPass = process.env.NEXT_PUBLIC_ADMIN_PASS || "Admin@2026";
+  useEffect(() => {
+    if (loading) return;
+    const isLoginPage = pathname === "/superadmin/login";
+    const isSuperadminRoute = pathname.startsWith("/superadmin");
 
-        if (user === adminEmail && pass === adminPass) {
-            localStorage.setItem("superadmin_logged_in", "true");
-            setIsAuthenticated(true);
-            router.push("/superadmin/dashboard");
-            return true;
-        }
-        return false;
-    };
+    if (isSuperadminRoute && !isLoginPage && !isAuthenticated) {
+      router.replace("/superadmin/login");
+    } else if (isLoginPage && isAuthenticated) {
+      router.replace("/superadmin/dashboard");
+    }
+  }, [isAuthenticated, pathname, loading, router]);
 
-    const logout = () => {
-        localStorage.removeItem("superadmin_logged_in");
-        setIsAuthenticated(false);
-        router.push("/superadmin/login");
-    };
+  const login = async (email: string, password: string): Promise<LoginResult> => {
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
 
-    return (
-        <AdminAuthContext.Provider value={{ isAuthenticated, login, logout }}>
-            {children}
-        </AdminAuthContext.Provider>
-    );
+      if (!res.ok || !data.success || !data.user) {
+        return {
+          ok: false,
+          error: data.message || "Invalid email or password",
+        };
+      }
+
+      setUser(data.user);
+      router.replace("/superadmin/dashboard");
+      return { ok: true };
+    } catch {
+      return { ok: false, error: "Unable to sign in right now" };
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } finally {
+      setUser(null);
+      router.replace("/superadmin/login");
+    }
+  };
+
+  const can = useCallback(
+    (permission: Permission) => hasPermission(user?.permissions, permission),
+    [user]
+  );
+
+  const canAny = useCallback(
+    (permissions: Permission[]) => hasAnyPermission(user?.permissions, permissions),
+    [user]
+  );
+
+  return (
+    <AdminAuthContext.Provider
+      value={{
+        user,
+        isAuthenticated,
+        loading,
+        login,
+        logout,
+        refreshUser,
+        can,
+        canAny,
+      }}
+    >
+      {children}
+    </AdminAuthContext.Provider>
+  );
 }
 
 export function useAdminAuth() {
-    const context = useContext(AdminAuthContext);
-    if (!context) {
-        throw new Error("useAdminAuth must be used within an AdminAuthProvider");
-    }
-    return context;
+  const context = useContext(AdminAuthContext);
+  if (!context) {
+    throw new Error("useAdminAuth must be used within an AdminAuthProvider");
+  }
+  return context;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useAdminAuth } from "@/context/AdminAuthContext";
+import { useAdminAuth } from "@/context/AdminAuthContext"; // or "@/contexts/AdminAuthContext"
 import { Lock, Mail, ShieldAlert, Eye, EyeOff } from "lucide-react";
 
 export default function AdminLoginPage() {
@@ -9,14 +9,24 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const { login } = useAdminAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    const success = login(email, password);
-    if (!success) {
-      setError("Invalid email or password. Please check your credentials.");
+    setSubmitting(true);
+
+    try {
+      const result = await login(email, password);
+      if (!result.ok) {
+        setError(
+          result.error ||
+            "Invalid email or password. Please check your credentials.",
+        );
+      }
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -28,10 +38,10 @@ export default function AdminLoginPage() {
             <Lock className="size-6" />
           </div>
           <h1 className="text-2xl font-serif font-bold text-[#1C3516]">
-            Superadmin Portal
+            Admin Portal
           </h1>
           <p className="text-xs text-stone-500 mt-1">
-            Enter your credentials to access the management console
+            Sign in with your assigned account to access the management console
           </p>
         </div>
 
@@ -45,7 +55,7 @@ export default function AdminLoginPage() {
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">
-              Admin Email
+              Email Address
             </label>
             <div className="relative">
               <Mail className="absolute left-3.5 top-3.5 size-4 text-stone-400" />
@@ -91,14 +101,15 @@ export default function AdminLoginPage() {
 
           <button
             type="submit"
-            className="w-full py-3.5 rounded-xl bg-[#1C3516] text-white text-sm font-medium shadow-md transition-all hover:bg-[#274a20]"
+            disabled={submitting}
+            className="w-full py-3.5 rounded-xl bg-[#1C3516] text-white text-sm font-medium shadow-md transition-all hover:bg-[#274a20] disabled:opacity-50"
           >
-            Sign In to Dashboard
+            {submitting ? "Signing In..." : "Sign In to Dashboard"}
           </button>
         </form>
 
         <div className="mt-6 text-center text-xs text-stone-400">
-          Protected Environment Configuration
+          Role &amp; Permission Protected Access
         </div>
       </div>
     </div>
