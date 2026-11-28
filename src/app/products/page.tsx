@@ -13,7 +13,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, X, ImageOff, SlidersHorizontal } from "lucide-react";
-import Markdown from "@/components/Markdown";
 import MarkdownPreview from "@/components/MarkdownPreview";
 
 /* ---------- Types ---------- */
